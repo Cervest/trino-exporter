@@ -19,6 +19,7 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		UpdateGauges(*jmxMetrics)
 	}
+	fmt.Println(FetchQueryInfo())
 	promhttp.Handler().ServeHTTP(w, r)
 }
 
