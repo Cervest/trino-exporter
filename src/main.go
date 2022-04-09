@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +20,22 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		UpdateGauges(*jmxMetrics)
 	}
-	fmt.Println(FetchQueryInfo())
+	apiQueries, err := FetchQueryInfo()
+	if err == nil {
+		for _, q := range apiQueries {
+			log.Log().
+				Str("catalog", q.Catalog).
+				Time("time", q.CreateTime).
+				Int64("duration_ms", q.DurationMs).
+				Str("id", q.QueryId).
+				Int("size_bytes", q.QuerySizeBytes).
+				Str("type", q.QueryType).
+				Str("state", q.State).
+				Str("user", q.User).
+				Str("user_agent", q.UserAgent).
+				Msg("")
+		}
+	}
 	promhttp.Handler().ServeHTTP(w, r)
 }
 
@@ -30,14 +46,16 @@ func main() {
 	Cluster = os.Args[1]
 	Host = os.Args[2]
 
+	zerolog.TimestampFieldName = "exporter_log_time"
+
 	for _, gauge := range Gauges {
 		prometheus.MustRegister(gauge)
 	}
 
 	server := &http.Server{
-		Addr: ":8567",
+		Addr: ":5885",
 	}
 	http.HandleFunc("/metrics", metricsHandler)
 	http.HandleFunc("/status", statusHandler)
-	log.Fatal(server.ListenAndServe())
+	server.ListenAndServe()
 }
