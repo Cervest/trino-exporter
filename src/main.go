@@ -22,10 +22,13 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 	promhttp.Handler().ServeHTTP(w, r)
 }
 
-var host string
+var Host string
+var Cluster string
 
 func main() {
-	host = os.Args[1]
+	Cluster = os.Args[1]
+	Host = os.Args[2]
+
 	for _, gauge := range Gauges {
 		prometheus.MustRegister(gauge)
 	}

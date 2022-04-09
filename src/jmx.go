@@ -23,7 +23,7 @@ func fetchMetrics() ([]metric, error) {
 	client := &http.Client{
 		Timeout: 2 * time.Second,
 	}
-	req, err := http.NewRequest("GET", host+"/v1/jmx/mbean", nil)
+	req, err := http.NewRequest("GET", Host+"/v1/jmx/mbean", nil)
 	if err != nil {
 		return nil, err
 	}
