@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -20,10 +21,14 @@ var counter = prometheus.NewCounter(prometheus.CounterOpts{
 
 func metricsHandler(w http.ResponseWriter, r *http.Request) {
 	counter.Inc()
+	fmt.Println(ReadJmxMetrics())
 	promhttp.Handler().ServeHTTP(w, r)
 }
 
+var host string
+
 func main() {
+	host = os.Args[1]
 	prometheus.MustRegister(counter)
 
 	server := &http.Server{
