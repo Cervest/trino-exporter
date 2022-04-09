@@ -44,7 +44,7 @@ func fetchMetrics() ([]metric, error) {
 
 type JmxMetrics struct {
 	AbandonedQueriesTotalCount              float64
-	CanceledQueriesTotalCount               float64
+	CancelledQueriesTotalCount              float64
 	CompletedQueriesTotalCount              float64
 	ConsumedCpuTimeSecsTotalCount           float64
 	ConsumedInputBytesTotalCount            float64
@@ -57,7 +57,6 @@ type JmxMetrics struct {
 	InternalFailuresTotalCount              float64
 	QueuedQueries                           float64
 	QueuedTimeAllTimeAvg                    float64
-	QueuedTimeAllTimeMax                    float64
 	QueuedTimeAllTimeP95                    float64
 	RunningQueries                          float64
 	UserErrorFailuresTotalCount             float64
@@ -87,7 +86,7 @@ func ReadJmxMetrics() (*JmxMetrics, error) {
 
 	return &JmxMetrics{
 		AbandonedQueriesTotalCount:              attributes["AbandonedQueries.TotalCount"],
-		CanceledQueriesTotalCount:               attributes["CanceledQueries.TotalCount"],
+		CancelledQueriesTotalCount:              attributes["CanceledQueries.TotalCount"], // sic
 		CompletedQueriesTotalCount:              attributes["CompletedQueries.TotalCount"],
 		ConsumedCpuTimeSecsTotalCount:           attributes["ConsumedCpuTimeSecs.TotalCount"],
 		ConsumedInputBytesTotalCount:            attributes["ConsumedInputBytes.TotalCount"],
@@ -100,7 +99,6 @@ func ReadJmxMetrics() (*JmxMetrics, error) {
 		InternalFailuresTotalCount:              attributes["InternalFailures.TotalCount"],
 		QueuedQueries:                           attributes["QueuedQueries"],
 		QueuedTimeAllTimeAvg:                    attributes["QueuedTime.AllTime.Avg"],
-		QueuedTimeAllTimeMax:                    attributes["QueuedTime.AllTime.Max"],
 		QueuedTimeAllTimeP95:                    attributes["QueuedTime.AllTime.P95"],
 		RunningQueries:                          attributes["RunningQueries"],
 		UserErrorFailuresTotalCount:             attributes["UserErrorFailures.TotalCount"],

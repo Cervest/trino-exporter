@@ -14,14 +14,11 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "I'm well, thank you.")
 }
 
-var counter = prometheus.NewCounter(prometheus.CounterOpts{
-	Name: "counter",
-	Help: "Help!",
-})
-
 func metricsHandler(w http.ResponseWriter, r *http.Request) {
-	counter.Inc()
-	fmt.Println(ReadJmxMetrics())
+	jmxMetrics, err := ReadJmxMetrics()
+	if err == nil {
+		UpdateGauges(*jmxMetrics)
+	}
 	promhttp.Handler().ServeHTTP(w, r)
 }
 
@@ -29,7 +26,9 @@ var host string
 
 func main() {
 	host = os.Args[1]
-	prometheus.MustRegister(counter)
+	for _, gauge := range Gauges {
+		prometheus.MustRegister(gauge)
+	}
 
 	server := &http.Server{
 		Addr: ":8567",
