@@ -13,10 +13,9 @@ type metric struct {
 }
 
 type metricAttribute struct {
-	Name string
-	// Not all attributes are float64, but the ones we’re interested in either
-	// are, or can be reliably parsed to one.
-	Value float64
+	Name  string
+	Type  string
+	Value *json.RawMessage
 }
 
 func fetchMetrics() ([]metric, error) {
@@ -85,7 +84,17 @@ func ReadJmxMetrics() (*JmxMetrics, error) {
 				return nil, err
 			}
 			for _, attr := range metricAttrs {
-				attributes[attr.Name] = attr.Value
+				if !(attr.Type == "int" || attr.Type == "long" || attr.Type == "double") {
+					continue
+				}
+				// Not all attributes are float64, but the ones we’re interested in either
+				// are, or can be reliably parsed to one.
+				var val float64
+				err = json.Unmarshal(*attr.Value, &val)
+				if err != nil {
+					return nil, err
+				}
+				attributes[attr.Name] = val
 			}
 		}
 	}
