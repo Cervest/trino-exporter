@@ -39,7 +39,7 @@ type QueryInfo struct {
 	UserAgent      string
 }
 
-var lastProcessed, _ = time.Parse("2006-01-02", "1970-01-01")
+var lastProcessed = time.Now()
 
 func FetchQueryInfo() ([]QueryInfo, error) {
 	client := &http.Client{
@@ -56,6 +56,9 @@ func FetchQueryInfo() ([]QueryInfo, error) {
 	}
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
 	var raw []rawQueryInfo
 	err = json.Unmarshal(body, &raw)
 	if err != nil {

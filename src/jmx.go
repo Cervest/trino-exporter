@@ -34,6 +34,9 @@ func fetchMetrics() ([]metric, error) {
 	}
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
 	var metrics []metric
 	err = json.Unmarshal(body, &metrics)
 	if err != nil {

@@ -19,6 +19,8 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 	jmxMetrics, err := ReadJmxMetrics()
 	if err == nil {
 		UpdateGauges(*jmxMetrics)
+	} else {
+		log.Error().Msg(err.Error())
 	}
 	apiQueries, err := FetchQueryInfo()
 	if err == nil {
@@ -35,6 +37,8 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 				Str("user_agent", q.UserAgent).
 				Msg("")
 		}
+	} else {
+		log.Error().Msg(err.Error())
 	}
 	promhttp.Handler().ServeHTTP(w, r)
 }
