@@ -7,7 +7,6 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -27,12 +26,12 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 		for _, q := range apiQueries {
 			log.Log().
 				Str("catalog", q.Catalog).
-				Time("time", q.CreateTime).
 				Int64("duration_ms", q.DurationMs).
 				Str("id", q.QueryId).
+				Time("query_time", q.CreateTime).
 				Int("size_bytes", q.QuerySizeBytes).
-				Str("type", q.QueryType).
 				Str("state", q.State).
+				Str("type", q.QueryType).
 				Str("user", q.User).
 				Str("user_agent", q.UserAgent).
 				Msg("")
@@ -47,10 +46,18 @@ var Host string
 var Cluster string
 
 func main() {
-	Cluster = os.Args[1]
-	Host = os.Args[2]
-
-	zerolog.TimestampFieldName = "exporter_log_time"
+	clusterEnv := os.Getenv("TRINO_EXPORTER_CLUSTER")
+	if clusterEnv == "" {
+		log.Fatal().Msg("TRINO_EXPORTER_CLUSTER was not set.")
+		os.Exit(1)
+	}
+	hostEnv := os.Getenv("TRINO_EXPORTER_HOST")
+	if hostEnv == "" {
+		log.Fatal().Msg("TRINO_EXPORTER_HOST was not set.")
+		os.Exit(1)
+	}
+	Cluster = clusterEnv
+	Host = hostEnv
 
 	for _, gauge := range Gauges {
 		prometheus.MustRegister(gauge)
