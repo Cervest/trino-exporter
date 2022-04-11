@@ -80,7 +80,10 @@ func ReadJmxMetrics() (*JmxMetrics, error) {
 	for _, m := range metrics {
 		if include[m.ObjectName] {
 			var metricAttrs []metricAttribute
-			json.Unmarshal(*m.Attributes, &metricAttrs)
+			err = json.Unmarshal(*m.Attributes, &metricAttrs)
+			if err != nil {
+				return nil, err
+			}
 			for _, attr := range metricAttrs {
 				attributes[attr.Name] = attr.Value
 			}
