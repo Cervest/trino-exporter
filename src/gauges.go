@@ -2,7 +2,7 @@ package main
 
 import "github.com/prometheus/client_golang/prometheus"
 
-var metricClusterKey = "trino-cluster"
+var metricClusterKey = "trino_cluster"
 
 var abandonedQueries = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 	Namespace: "trino",
