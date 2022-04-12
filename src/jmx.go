@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"math"
 	"net/http"
 	"time"
 )
@@ -15,7 +16,7 @@ type metric struct {
 type metricAttribute struct {
 	Name  string
 	Type  string
-	Value *json.RawMessage
+	Value interface{}
 }
 
 func fetchMetrics() ([]metric, error) {
@@ -84,17 +85,18 @@ func ReadJmxMetrics() (*JmxMetrics, error) {
 				return nil, err
 			}
 			for _, attr := range metricAttrs {
-				if !(attr.Type == "int" || attr.Type == "long" || attr.Type == "double") {
-					continue
+				switch attr.Value.(type) {
+				case int:
+					attributes[attr.Name] = attr.Value.(float64)
+				case float64:
+					attributes[attr.Name] = attr.Value.(float64)
+				default:
+					// This handles two cases. The first is where the attribute is not a numeric
+					// type, in which case we’re not interested in it, because it can’t be used
+					// as a metric. The second is when the returned value is the string "NaN",
+					// which it how it represents NaN for double attributes.
+					attributes[attr.Name] = math.NaN()
 				}
-				// Not all attributes are float64, but the ones we’re interested in either
-				// are, or can be reliably parsed to one.
-				var val float64
-				err = json.Unmarshal(*attr.Value, &val)
-				if err != nil {
-					return nil, err
-				}
-				attributes[attr.Name] = val
 			}
 		}
 	}
