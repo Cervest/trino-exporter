@@ -4,6 +4,21 @@ import "github.com/prometheus/client_golang/prometheus"
 
 var metricClusterKey = "trino_cluster"
 
+var activeNodeCount = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	Namespace: "trino",
+	Name:      "nodes_active_count",
+}, []string{metricClusterKey})
+
+var inactiveNodeCount = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	Namespace: "trino",
+	Name:      "nodes_inactive_count",
+}, []string{metricClusterKey})
+
+var shuttingDownNodeCount = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	Namespace: "trino",
+	Name:      "nodes_shutting_down_count",
+}, []string{metricClusterKey})
+
 var abandonedQueries = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 	Namespace: "trino",
 	Name:      "queries_abandoned_count_total",
@@ -91,6 +106,7 @@ var resourceFailures = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 
 var Gauges = []*prometheus.GaugeVec{
 	abandonedQueries,
+	activeNodeCount,
 	cancelledQueries,
 	completedQueries,
 	cpuTime,
@@ -98,6 +114,7 @@ var Gauges = []*prometheus.GaugeVec{
 	execTimeP95,
 	externalFailures,
 	failedQueries,
+	inactiveNodeCount,
 	inputBytes,
 	inputRows,
 	internalFailures,
@@ -106,12 +123,13 @@ var Gauges = []*prometheus.GaugeVec{
 	queuedTimeP95,
 	resourceFailures,
 	runningQueries,
+	shuttingDownNodeCount,
 	userFailures,
 }
 
 func UpdateGauges(m JmxMetrics) {
 	abandonedQueries.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.AbandonedQueriesTotalCount)
-	abandonedQueries.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.AbandonedQueriesTotalCount)
+	activeNodeCount.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.ActiveNodeCount)
 	cancelledQueries.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.CancelledQueriesTotalCount)
 	completedQueries.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.CompletedQueriesTotalCount)
 	cpuTime.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.ConsumedCpuTimeSecsTotalCount)
@@ -119,6 +137,7 @@ func UpdateGauges(m JmxMetrics) {
 	execTimeP95.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.ExecutionTimeAllTimeP95)
 	externalFailures.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.ExternalFailuresTotalCount)
 	failedQueries.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.FailedQueriesTotalCount)
+	inactiveNodeCount.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.InactiveNodeCount)
 	inputBytes.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.ConsumedInputBytesTotalCount)
 	inputRows.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.ConsumedInputRowsTotalCount)
 	internalFailures.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.InternalFailuresTotalCount)
@@ -127,5 +146,6 @@ func UpdateGauges(m JmxMetrics) {
 	queuedTimeP95.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.QueuedTimeAllTimeP95)
 	resourceFailures.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.InsufficientResourcesFailuresTotalCount)
 	runningQueries.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.RunningQueries)
+	shuttingDownNodeCount.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.ShuttingDownNodeCount)
 	userFailures.With(prometheus.Labels{metricClusterKey: Cluster}).Set(m.UserErrorFailuresTotalCount)
 }

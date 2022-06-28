@@ -47,6 +47,7 @@ func fetchMetrics() ([]metric, error) {
 
 type JmxMetrics struct {
 	AbandonedQueriesTotalCount              float64
+	ActiveNodeCount                         float64
 	CancelledQueriesTotalCount              float64
 	CompletedQueriesTotalCount              float64
 	ConsumedCpuTimeSecsTotalCount           float64
@@ -56,19 +57,22 @@ type JmxMetrics struct {
 	ExecutionTimeAllTimeP95                 float64
 	ExternalFailuresTotalCount              float64
 	FailedQueriesTotalCount                 float64
+	InactiveNodeCount                       float64
 	InsufficientResourcesFailuresTotalCount float64
 	InternalFailuresTotalCount              float64
 	QueuedQueries                           float64
 	QueuedTimeAllTimeAvg                    float64
 	QueuedTimeAllTimeP95                    float64
 	RunningQueries                          float64
+	ShuttingDownNodeCount                   float64
 	UserErrorFailuresTotalCount             float64
 }
 
 func ReadJmxMetrics() (*JmxMetrics, error) {
 	include := map[string]bool{
-		"trino.execution:name=QueryExecution": true,
-		"trino.execution:name=QueryManager":   true,
+		"trino.execution:name=QueryExecution":      true,
+		"trino.execution:name=QueryManager":        true,
+		"trino.metadata:name=DiscoveryNodeManager": true,
 	}
 
 	metrics, err := fetchMetrics()
@@ -103,6 +107,7 @@ func ReadJmxMetrics() (*JmxMetrics, error) {
 
 	return &JmxMetrics{
 		AbandonedQueriesTotalCount:              attributes["AbandonedQueries.TotalCount"],
+		ActiveNodeCount:                         attributes["ActiveNodeCount"],
 		CancelledQueriesTotalCount:              attributes["CanceledQueries.TotalCount"], // sic
 		CompletedQueriesTotalCount:              attributes["CompletedQueries.TotalCount"],
 		ConsumedCpuTimeSecsTotalCount:           attributes["ConsumedCpuTimeSecs.TotalCount"],
@@ -112,12 +117,14 @@ func ReadJmxMetrics() (*JmxMetrics, error) {
 		ExecutionTimeAllTimeP95:                 attributes["ExecutionTime.AllTime.P95"],
 		ExternalFailuresTotalCount:              attributes["ExternalFailures.TotalCount"],
 		FailedQueriesTotalCount:                 attributes["FailedQueries.TotalCount"],
+		InactiveNodeCount:                       attributes["InactiveNodeCount"],
 		InsufficientResourcesFailuresTotalCount: attributes["InsufficientResourcesFailures.TotalCount"],
 		InternalFailuresTotalCount:              attributes["InternalFailures.TotalCount"],
 		QueuedQueries:                           attributes["QueuedQueries"],
 		QueuedTimeAllTimeAvg:                    attributes["QueuedTime.AllTime.Avg"],
 		QueuedTimeAllTimeP95:                    attributes["QueuedTime.AllTime.P95"],
 		RunningQueries:                          attributes["RunningQueries"],
+		ShuttingDownNodeCount:                   attributes["ShuttingDownNodeCount"],
 		UserErrorFailuresTotalCount:             attributes["UserErrorFailures.TotalCount"],
 	}, nil
 }
