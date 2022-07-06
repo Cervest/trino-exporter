@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"sort"
 	"time"
 )
 
@@ -64,11 +65,19 @@ func FetchQueryInfo() ([]QueryInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Sort queries by end time, oldest first.
+	sort.Slice(raw, func(i, j int) bool {
+		return raw[i].QueryStats.EndTime.Before(raw[j].QueryStats.EndTime)
+	})
 
 	queries := []QueryInfo{}
-	latestQuery := lastProcessed
 	for _, q := range raw {
-		if q.QueryStats.CreateTime.After(lastProcessed) {
+		if q.QueryStats.EndTime.IsZero() {
+			// the query is still running, skip it
+			continue
+		}
+
+		if q.QueryStats.EndTime.After(lastProcessed) {
 			queries = append(queries, QueryInfo{
 				Catalog:        q.Session.Catalog,
 				CreateTime:     q.QueryStats.CreateTime,
@@ -81,10 +90,9 @@ func FetchQueryInfo() ([]QueryInfo, error) {
 				UserAgent:      q.Session.UserAgent,
 			})
 		}
-		if q.QueryStats.CreateTime.After(latestQuery) {
-			latestQuery = q.QueryStats.CreateTime
+		if q.QueryStats.EndTime.After(lastProcessed) {
+			lastProcessed = q.QueryStats.EndTime
 		}
 	}
-	lastProcessed = latestQuery
 	return queries, nil
 }
