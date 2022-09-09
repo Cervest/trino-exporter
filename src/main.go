@@ -28,6 +28,7 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 				Str("catalog", q.Catalog).
 				Int64("duration_ms", q.DurationMs).
 				Str("id", q.QueryId).
+				Str("principal", q.Principal).
 				Time("query_time", q.CreateTime).
 				Int("size_bytes", q.QuerySizeBytes).
 				Str("state", q.State).

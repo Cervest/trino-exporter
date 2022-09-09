@@ -10,6 +10,7 @@ import (
 
 type session struct {
 	Catalog   string
+	Principal string
 	User      string
 	UserAgent string
 }
@@ -32,6 +33,7 @@ type QueryInfo struct {
 	Catalog        string
 	CreateTime     time.Time
 	DurationMs     int64
+	Principal      string
 	QueryId        string
 	QuerySizeBytes int
 	QueryType      string
@@ -82,6 +84,7 @@ func FetchQueryInfo() ([]QueryInfo, error) {
 				Catalog:        q.Session.Catalog,
 				CreateTime:     q.QueryStats.CreateTime,
 				DurationMs:     q.QueryStats.EndTime.Sub(q.QueryStats.CreateTime).Milliseconds(),
+				Principal:      q.Session.Principal,
 				QueryId:        q.QueryId,
 				QuerySizeBytes: len(q.Query),
 				QueryType:      q.QueryType,
